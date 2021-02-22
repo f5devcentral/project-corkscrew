@@ -1,0 +1,110 @@
+{
+    "id": "9ee9b406-69d2-4c30-9879-07b955e96872",
+    "dateTime": "2020-12-17T12:51:18.071Z",
+    "inputFileType": ".conf",
+    "config": {
+        "sources": [
+            {
+                "fileName": "bigip.conf",
+                "size": 257016
+            }
+        ],
+        "apps": [
+            {
+                "name": "/Common/sni-routing-1a",
+                "configs": [
+                    "ltm virtual /Common/sni-routing-1a {\n    creation-time 2020-12-14:14:59:54\n    destination /Common/10.80.67.223:0\n    ip-protocol tcp\n    last-modified-time 2020-12-14:15:06:26\n    mask 255.255.255.255\n    persist {\n        /Common/ssl {\n            default yes\n        }\n    }\n    policies {\n        /Common/sni-routing-policy { }\n    }\n    profiles {\n        /Common/tcp { }\n    }\n    serverssl-use-sni disabled\n    source 0.0.0.0/0\n    translate-address enabled\n    translate-port disabled\n}",
+                    "ltm policy /Common/sni-routing-policy {\n    controls { forwarding }\n    requires { client-ssl }\n    rules {\n        www.myaspirevisa.com {\n            actions {\n                0 {\n                    forward\n                    ssl-client-hello\n                    select\n                    virtual /Common/www.myaspirevisa.com\n                }\n            }\n            conditions {\n                0 {\n                    ssl-extension\n                    ssl-client-hello\n                    server-name\n                    values { www.myaspirevisa.com }\n                }\n            }\n        }\n    }\n    strategy /Common/first-match\n}"
+                ],
+                "map": {
+                    "vsDest": "/Common/10.80.67.223:0"
+                }
+            },
+            {
+                "name": "/Common/sni-routing-1b",
+                "configs": [
+                    "ltm virtual /Common/sni-routing-1b {\n    creation-time 2020-12-14:14:54:26\n    destination /Common/10.80.68.58:0\n    ip-protocol tcp\n    last-modified-time 2020-12-14:15:07:23\n    mask 255.255.255.255\n    persist {\n        /Common/ssl {\n            default yes\n        }\n    }\n    policies {\n        /Common/sni-routing-policy { }\n    }\n    profiles {\n        /Common/tcp { }\n    }\n    serverssl-use-sni disabled\n    source 0.0.0.0/0\n    translate-address enabled\n    translate-port disabled\n}",
+                    "ltm policy /Common/sni-routing-policy {\n    controls { forwarding }\n    requires { client-ssl }\n    rules {\n        www.myaspirevisa.com {\n            actions {\n                0 {\n                    forward\n                    ssl-client-hello\n                    select\n                    virtual /Common/www.myaspirevisa.com\n                }\n            }\n            conditions {\n                0 {\n                    ssl-extension\n                    ssl-client-hello\n                    server-name\n                    values { www.myaspirevisa.com }\n                }\n            }\n        }\n    }\n    strategy /Common/first-match\n}"
+                ],
+                "map": {
+                    "vsDest": "/Common/10.80.68.58:0"
+                }
+            },
+            {
+                "name": "/Common/www.myaspirevisa.com",
+                "configs": [
+                    "ltm virtual /Common/www.myaspirevisa.com {\n    creation-time 2020-12-14:14:03:50\n    destination /Common/172.31.1.1:443\n    ip-protocol tcp\n    last-modified-time 2020-12-14:15:34:32\n    mask 255.255.255.255\n    pool /Common/Pool_www.myaspirevisa.com\n    profiles {\n        /Common/tcp { }\n        /Common/wildcard.myaspirevisa.com {\n            context clientside\n        }\n    }\n    serverssl-use-sni disabled\n    source 0.0.0.0/0\n    source-address-translation {\n        pool /Common/SNAT_172.31.1.1\n        type snat\n    }\n    translate-address enabled\n    translate-port enabled\n}",
+                    "ltm pool /Common/Pool_www.myaspirevisa.com {\n    description www.myaspirevisa.com\n    members {\n        /Common/10.88.168.22:80 {\n            address 10.88.168.22\n        }\n        /Common/10.88.169.22:80 {\n            address 10.88.169.22\n        }\n    }\n    monitor /Common/http-myaspirevisa\n}",
+                    "ltm node /Common/10.88.168.22 {\n    address 10.88.168.22\n}",
+                    "ltm node /Common/10.88.169.22 {\n    address 10.88.169.22\n}",
+                    "ltm monitor http /Common/http-myaspirevisa {\n    adaptive disabled\n    defaults-from /Common/http\n    description \"http health monitor myaspirevisa.com\"\n    interval 5\n    ip-dscp 0\n    recv GOOD\n    recv-disable none\n    send \"GET /lbcheck.php HTTP/1.1\\r\\nHost: www.myaspirevisa.com\"\n    time-until-up 0\n    timeout 16\n}",
+                    "ltm profile client-ssl /Common/wildcard.myaspirevisa.com {\n    alert-timeout indefinite\n    allow-dynamic-record-sizing disabled\n    allow-non-ssl disabled\n    app-service none\n    cache-size 262144\n    cache-timeout 3600\n    cert-key-chain {\n        \\*.myaspirevisa_0 {\n            cert /Common/*.myaspirevisa.com\n            key /Common/*.myaspirevisa.com\n        }\n    }\n    cipher-group none\n    ciphers DEFAULT\n    data-0rtt disabled\n    defaults-from /Common/Secure_TLS\n    generic-alert enabled\n    handshake-timeout 10\n    inherit-ca-certkeychain true\n    inherit-certkeychain false\n    max-active-handshakes indefinite\n    max-aggregate-renegotiation-per-minute indefinite\n    max-renegotiations-per-minute 5\n    maximum-record-size 16384\n    mod-ssl-methods disabled\n    mode enabled\n    notify-cert-status-to-virtual-server disabled\n    ocsp-stapling disabled\n    options { dont-insert-empty-fragments no-tlsv1.3 no-tlsv1.1 no-sslv3 no-tlsv1 }\n    peer-no-renegotiate-timeout 10\n    proxy-ssl disabled\n    proxy-ssl-passthrough disabled\n    renegotiate-max-record-delay indefinite\n    renegotiate-period indefinite\n    renegotiate-size indefinite\n    renegotiation enabled\n    secure-renegotiation require\n    server-name none\n    session-mirroring disabled\n    session-ticket disabled\n    session-ticket-timeout 0\n    sni-default false\n    sni-require false\n    ssl-sign-hash any\n    strict-resume disabled\n    unclean-shutdown enabled\n}",
+                    "ltm snatpool /Common/SNAT_172.31.1.1 {\n    members {\n        /Common/172.31.1.1\n    }\n}"
+                ],
+                "map": {
+                    "vsDest": "/Common/172.31.1.1:443",
+                    "pool": [
+                        "10.88.168.22:80",
+                        "10.88.169.22:80"
+                    ]
+                }
+            }
+        ],
+        "base": []
+    },
+    "stats": {
+        "objectCount": 845,
+        "configBytes": 257016,
+        "loadTime": 1.72249,
+        "objects": {
+            "virtuals": 3,
+            "profiles": 1,
+            "policies": 1,
+            "pools": 1,
+            "monitors": 1,
+            "nodes": 4,
+            "snatPools": 1
+        },
+        "sourceTmosVersion": "15.1.0.4",
+        "parseTime": 93.523691,
+        "appTime": 5.292123,
+        "packTime": 0.820351
+    },
+    "logs": [
+        "[2020-12-17T12:51:13.206Z] DeBuG: 'regular date log message'",
+        "[12/17/2020, 8:51:13 AM] DeBuG: 'toLocalString date log message'",
+        "[Thu, 17 Dec 2020 12:51:13 GMT] DeBuG: 'to UTC date log message'",
+        "[2020-12-17T12:51:13.463Z] [DEBUG]: got .conf file [/Users/spereira/github.com/f5-corkscrew/src/tests/artifacts/bigip.conf], size [257016]",
+        "[2020-12-17T12:51:17.117Z] [DEBUG]: Begining to parse configs",
+        "[2020-12-17T12:51:17.118Z] [INFO]: Recieved .conf file of version: 15.1.0.4",
+        "[2020-12-17T12:51:17.118Z] [DEBUG]: creating more detailed arrays/objects for deeper inspection",
+        "[2020-12-17T12:51:18.065Z] [INFO]: digging vs config for /Common/sni-routing-1a",
+        "[2020-12-17T12:51:18.067Z] [DEBUG]: profile references found:  [ '/Common/tcp' ]",
+        "[2020-12-17T12:51:18.068Z] [DEBUG]: Found 1 system default profiles, compare previous arrays for details",
+        "[2020-12-17T12:51:18.068Z] [DEBUG]: [/Common/sni-routing-1a] found the following profiles \n        /Common/tcp { }",
+        "[2020-12-17T12:51:18.068Z] [DEBUG]: policy references found:  [ '/Common/sni-routing-policy' ]",
+        "[2020-12-17T12:51:18.068Z] [DEBUG]: policy found [/Common/sni-routing-policy]",
+        "[2020-12-17T12:51:18.068Z] [DEBUG]: [/Common/sni-routing-1a] found the following policies \n        /Common/sni-routing-policy { }",
+        "[2020-12-17T12:51:18.068Z] [ERROR]: findValueFromKey function expected object, got: undefined",
+        "[2020-12-17T12:51:18.068Z] [DEBUG]: [/Common/sni-routing-1a] found the following persistence \n        /Common/ssl {\n            default yes\n        }",
+        "[2020-12-17T12:51:18.068Z] [INFO]: digging vs config for /Common/sni-routing-1b",
+        "[2020-12-17T12:51:18.069Z] [DEBUG]: profile references found:  [ '/Common/tcp' ]",
+        "[2020-12-17T12:51:18.069Z] [DEBUG]: Found 1 system default profiles, compare previous arrays for details",
+        "[2020-12-17T12:51:18.069Z] [DEBUG]: [/Common/sni-routing-1b] found the following profiles \n        /Common/tcp { }",
+        "[2020-12-17T12:51:18.069Z] [DEBUG]: policy references found:  [ '/Common/sni-routing-policy' ]",
+        "[2020-12-17T12:51:18.069Z] [DEBUG]: policy found [/Common/sni-routing-policy]",
+        "[2020-12-17T12:51:18.069Z] [DEBUG]: [/Common/sni-routing-1b] found the following policies \n        /Common/sni-routing-policy { }",
+        "[2020-12-17T12:51:18.069Z] [ERROR]: findValueFromKey function expected object, got: undefined",
+        "[2020-12-17T12:51:18.069Z] [DEBUG]: [/Common/sni-routing-1b] found the following persistence \n        /Common/ssl {\n            default yes\n        }",
+        "[2020-12-17T12:51:18.069Z] [INFO]: digging vs config for /Common/www.myaspirevisa.com",
+        "[2020-12-17T12:51:18.069Z] [DEBUG]: digging pool config for /Common/Pool_www.myaspirevisa.com",
+        "[2020-12-17T12:51:18.070Z] [DEBUG]: Pool /Common/Pool_www.myaspirevisa.com members found: [ '/Common/10.88.168.22', '/Common/10.88.169.22' ]",
+        "[2020-12-17T12:51:18.070Z] [DEBUG]: pool monitor references found: [ '/Common/http-myaspirevisa' ]",
+        "[2020-12-17T12:51:18.070Z] [DEBUG]: pool monitor configs found: [\n  'ltm monitor http /Common/http-myaspirevisa {\\n' +\n    '    adaptive disabled\\n' +\n    '    defaults-from /Common/http\\n' +\n    '    description \"http health monitor myaspirevisa.com\"\\n' +\n    '    interval 5\\n' +\n    '    ip-dscp 0\\n' +\n    '    recv GOOD\\n' +\n    '    recv-disable none\\n' +\n    '    send \"GET /lbcheck.php HTTP/1.1\\\\r\\\\nHost: www.myaspirevisa.com\"\\n' +\n    '    time-until-up 0\\n' +\n    '    timeout 16\\n' +\n    '}'\n]",
+        "[2020-12-17T12:51:18.070Z] [DEBUG]: [/Common/www.myaspirevisa.com] found the following pool /Common/Pool_www.myaspirevisa.com",
+        "[2020-12-17T12:51:18.070Z] [DEBUG]: profile references found:  [ '/Common/tcp', '/Common/wildcard.myaspirevisa.com' ]",
+        "[2020-12-17T12:51:18.070Z] [DEBUG]: Found 1 system default profiles, compare previous arrays for details",
+        "[2020-12-17T12:51:18.070Z] [DEBUG]: [/Common/www.myaspirevisa.com] found the following profiles \n        /Common/tcp { }\n        /Common/wildcard.myaspirevisa.com {\n            context clientside\n        }",
+        "[2020-12-17T12:51:18.070Z] [DEBUG]: [/Common/www.myaspirevisa.com] found snat configuration \n        pool /Common/SNAT_172.31.1.1\n        type snat"
+    ]
+}
